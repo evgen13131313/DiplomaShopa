@@ -1,0 +1,42 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<div class="history-container">
+    <h1 class="page-title">📋 История заказов</h1>
+    
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <span class="order-number">Заказ #{{ order.id }}</span>
+                <span class="order-date">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            
+            <div class="order-body">
+                <div class="order-info">
+                    <p>📦 Товаров: {{ order.items.count }}</p>
+                    <p>💳 Оплата: {{ order.get_payment_method_display }}</p>
+                    <p>📍 Адрес: {{ order.city }}, {{ order.address }}</p>
+                </div>
+                <div class="order-total">
+                    <span>{{ order.final_amount }} ₽</span>
+                </div>
+            </div>
+            
+            <div class="order-footer">
+                <span class="status status-{{ order.status }}">{{ order.get_status_display }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>У вас пока нет заказов</h3>
+        <p>Сделайте первый заказ в нашем магазине</p>
+        <a href="{% url 'home' %}" class="btn btn-primary">Перейти к покупкам</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

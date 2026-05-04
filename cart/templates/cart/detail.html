@@ -1,0 +1,70 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<div class="cart-container">
+    <h1 class="page-title"> Корзина</h1>
+    
+    {% if cart|length > 0 %}
+    <div class="cart-items">
+        {% for item in cart %}
+        <div class="cart-item">
+            <div class="cart-item-image">
+                {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                {% else %}
+                    <div class="no-image"></div>
+                {% endif %}
+            </div>
+            
+            <div class="cart-item-info">
+                <h3>{{ item.product.name }}</h3>
+                <p class="cart-item-price">{{ item.product.price }} ₽</p>
+                <p class="cart-item-quantity">Количество: {{ item.quantity }} шт.</p>
+            </div>
+            
+            <div class="cart-item-total">
+                {{ item.total_price }} ₽
+            </div>
+            
+            <form action="{% url 'cart:cart_remove' item.product.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn-delete" title="Удалить товар">🗑️ Удалить</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="cart-summary">
+        <div class="summary-row">
+            <span>Товары ({{ cart|length }}):</span>
+            <span>{{ cart.get_total_price }} ₽</span>
+        </div>
+        
+        {% if discount_percent > 0 %}
+        <div class="summary-row discount">
+            <span>Скидка OnlineSale Wallet ({{ discount_percent }}%):</span>
+            <span>-{{ cart.get_total_price|floatformat:2|add:cart.get_total_price|floatformat:2|add:total_with_discount|floatformat:-2 }} ₽</span>
+        </div>
+        {% endif %}
+        
+        <div class="summary-row total">
+            <span>Итого:</span>
+            <span class="total-price">{{ total_with_discount }} ₽</span>
+        </div>
+        
+        <div class="cart-actions">
+            <a href="{% url 'home' %}" class="btn btn-secondary">← Продолжить покупки</a>
+            <a href="{% url 'orders:checkout' %}" class="btn btn-primary">Оформить заказ →</a>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="empty-cart">
+        <div class="empty-cart-icon"></div>
+        <h2>Ваша корзина пуста</h2>
+        <p>Добавьте товары из каталога</p>
+        <a href="{% url 'home' %}" class="btn btn-primary">Перейти к покупкам</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

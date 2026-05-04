@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - OnlineSale</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <!-- Шапка -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 15px;">
+                    <img src="{% if logo_url %}{{ logo_url }}{% else %}{% static 'img/logo.png' %}{% endif %}" 
+                         alt="Logo" 
+                         style="height: 50px; width: auto;">
+                    <h1>OnlineSale</h1>
+                </a>
+            </div>
+            <nav>
+                <a href="/"> Главная</a>
+                <a href="{% url 'cart:cart_detail' %}"> Корзина ({{ cart_length|default:0 }})</a>
+                
+                <!-- Умная навигация -->
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}"> {{ user.username }}</a>
+                    <a href="{% url 'logout' %}"> Выход</a>
+                {% else %}
+                    <a href="{% url 'login' %}"> Вход</a>
+                    <a href="{% url 'register' %}"> Регистрация</a>
+                {% endif %}
+                
+                <a href="/admin"> Админка</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Блок сообщений -->
+    {% if messages %}
+    <div class="messages container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Герой секция -->
+    <section class="hero">
+        <div class="container">
+            <h2>Добро пожаловать в OnlineSale</h2>
+            <p>Лучшие товары по лучшим ценам. Быстрая доставка и гарантия качества.</p>
+        </div>
+    </section>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <h2 class="section-title"> Каталог товаров</h2>
+        
+        {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <span class="product-category">{{ product.category.name|default:"Без категории" }}</span>
+                    <h3 class="product-title">{{ product.name }}</h3>
+                    <p class="product-description">
+                        {{ product.description|default:"Описание товара пока не добавлено"|truncatewords:15 }}
+                    </p>
+                    <div class="product-footer">
+                        <div class="product-price">
+                            {{ product.price }} ₽
+                        </div>
+                        <!-- Форма добавления в корзину -->
+                        <form action="{% url 'cart:cart_add' product.id %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn"> В корзину</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon"></div>
+            <h3>Товаров пока нет</h3>
+            <p>Добавьте первые товары через панель администратора</p>
+            <br>
+            <a href="/admin" class="btn">Перейти в админку</a>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Футер -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: LakiGak99@onlineSale.ru<br>
+                    Телефон: +7 (999) 228-13-13<br>
+                    Адрес: г. Новосибирск, ул. Тюленина 15/1, 124</p>
+                </div>
+                <div class="footer-section">
+                    <h3>ℹ О магазине</h3>
+                    <p>OnlineShop - современный интернет-магазин с широким ассортиментом товаров. 
+                    Мы работаем с 2023 года и стремимся предоставить лучший сервис.</p>
+                </div>
+                <div class="footer-section">
+                    <h3> Разделы</h3>
+                    <p>
+                        <a href="/">Главная</a><br>
+                        <a href="/admin">Админ-панель</a><br>
+                        <a href="#">О нас</a><br>
+                        <a href="#">Доставка</a>
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2023 OnlineSale. Почти все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

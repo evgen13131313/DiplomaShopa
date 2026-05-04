@@ -1,0 +1,37 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <span>{{ user.first_name|first }}{{ user.last_name|first }}</span>
+            </div>
+            <h2>{{ user.get_full_name }}</h2>
+            <p class="profile-username">@{{ user.username }}</p>
+        </div>
+        
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-label"> Email:</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label"> Дата регистрации:</span>
+                <span class="info-value">{{ user.date_joined|date:"d.m.Y H:i" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label"> Заказы:</span>
+                <span class="info-value">0 (в разработке)</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <a href="#" class="btn btn-secondary">Редактировать профиль</a>
+            <a href="{% url 'logout' %}" class="btn btn-outline">Выйти</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

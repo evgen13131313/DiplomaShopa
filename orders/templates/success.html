@@ -1,0 +1,31 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-card">
+        <div class="success-icon">✅</div>
+        <h1>Заказ успешно оформлен!</h1>
+        <p class="order-number">Номер заказа: #{{ order.id }}</p>
+        
+        <div class="order-details">
+            <div class="detail-row">
+                <span>Статус:</span>
+                <span class="status status-{{ order.status }}">{{ order.get_status_display }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Сумма:</span>
+                <span>{{ order.final_amount }} ₽</span>
+            </div>
+            <div class="detail-row">
+                <span>Оплата:</span>
+                <span>{{ order.get_payment_method_display }}</span>
+            </div>
+        </div>
+        
+        <div class="success-actions">
+            <a href="{% url 'orders:order_history' %}" class="btn btn-secondary">📋 Мои заказы</a>
+            <a href="{% url 'home' %}" class="btn btn-primary">🛒 Продолжить покупки</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
