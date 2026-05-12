@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <!-- Шапка -->
+    <!-- Шапка с поиском -->
     <header>
         <div class="container">
             <div class="logo">
@@ -20,11 +20,17 @@
                     <h1>OnlineSale</h1>
                 </a>
             </div>
+
+            <!-- Поисковая строка -->
+            <form action="{% url 'home' %}" method="get" class="header-search">
+                <input type="text" name="search" placeholder="Поиск товаров..." value="{{ search_query }}">
+                <button type="submit" class="search-btn">✎</button>
+            </form>
+            
             <nav>
                 <a href="/"> Главная</a>
                 <a href="{% url 'cart:cart_detail' %}"> Корзина ({{ cart_length|default:0 }})</a>
                 
-                <!-- Умная навигация -->
                 {% if user.is_authenticated %}
                     <a href="{% url 'profile' %}"> {{ user.username }}</a>
                     <a href="{% url 'logout' %}"> Выход</a>
@@ -52,14 +58,98 @@
     <!-- Герой секция -->
     <section class="hero">
         <div class="container">
-            <h2>Добро пожаловать в OnlineSale</h2>
-            <p>Лучшие товары по лучшим ценам. Быстрая доставка и гарантия качества.</p>
+            <h2>Каталог товаров</h2>
         </div>
     </section>
 
     <!-- Основной контент -->
     <main class="container">
-        <h2 class="section-title"> Каталог товаров</h2>
+        
+        <!-- Кнопка фильтров -->
+        <div class="filter-bar">
+            <button class="btn-filter" onclick="document.getElementById('filterModal').style.display='flex'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="6" x2="20" y2="6"/>
+                    <line x1="8" y1="12" x2="20" y2="12"/>
+                    <line x1="12" y1="18" x2="20" y2="18"/>
+                    <circle cx="6" cy="6" r="2"/>
+                    <circle cx="10" cy="12" r="2"/>
+                    <circle cx="14" cy="18" r="2"/>
+                </svg>
+                Фильтры
+                {% if category_id or min_price or max_price %}
+                <span class="filter-badge">✓</span>
+                {% endif %}
+            </button>
+        </div>
+
+        <!-- Модальное окно фильтров (без поиска) -->
+        <div id="filterModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) this.style.display='none'">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Фильтры</h3>
+                    <button class="modal-close" onclick="document.getElementById('filterModal').style.display='none'">&times;</button>
+                </div>
+                
+                <form method="get" class="filter-form-modal">
+                    <div class="filter-group">
+                        <label>☰ Категория</label>
+                        <select name="category">
+                            <option value="">Все категории</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if category_id == cat.id|stringformat:"s" %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-row-price">
+                        <div class="filter-group">
+                            <label>₽ От</label>
+                            <input type="number" name="min_price" placeholder="Мин." value="{{ min_price }}" min="0">
+                        </div>
+                        <div class="filter-group">
+                            <label>₽ До</label>
+                            <input type="number" name="max_price" placeholder="Макс." value="{{ max_price }}" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <a href="{% url 'home' %}" class="btn btn-modal-secondary">Сбросить</a>
+                        <button type="submit" class="btn btn-modal-primary">Применить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Активные фильтры -->
+        {% if search_query or category_id or min_price or max_price %}
+        <div class="active-filters">
+            <span>Активные фильтры:</span>
+            {% if search_query %}
+            <span class="filter-tag">Поиск: "{{ search_query }}"</span>
+            {% endif %}
+            {% if category_id %}
+            <span class="filter-tag">Категория #{{ category_id }}</span>
+            {% endif %}
+            {% if min_price %}
+            <span class="filter-tag">от {{ min_price }} руб.</span>
+            {% endif %}
+            {% if max_price %}
+            <span class="filter-tag">до {{ max_price }} руб.</span>
+            {% endif %}
+            <a href="{% url 'home' %}" class="clear-filters">Сбросить всё</a>
+        </div>
+        {% endif %}
+        
+        <!-- Статистика -->
+        <div class="catalog-stats">
+            <p>Найдено товаров: <strong>{{ products.paginator.count }}</strong></p>
+            {% if products.has_other_pages %}
+            <p>Страница {{ products.number }} из {{ products.paginator.num_pages }}</p>
+            {% endif %}
+        </div>
         
         {% if products %}
         <div class="products-grid">
@@ -68,6 +158,8 @@
                 <div class="product-image">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <div class="no-image"></div>
                     {% endif %}
                 </div>
                 <div class="product-info">
@@ -78,26 +170,48 @@
                     </p>
                     <div class="product-footer">
                         <div class="product-price">
-                            {{ product.price }} ₽
+                            {{ product.price }} руб.
                         </div>
-                        <!-- Форма добавления в корзину -->
                         <form action="{% url 'cart:cart_add' product.id %}" method="post" style="display: inline;">
                             {% csrf_token %}
                             <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn"> В корзину</button>
+                            <button type="submit" class="btn">В корзину</button>
                         </form>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Пагинация -->
+        {% if products.has_other_pages %}
+        <div class="pagination">
+            {% if products.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="page-link">Первая</a>
+            <a href="?page={{ products.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="page-link">Назад</a>
+            {% endif %}
+            
+            {% for num in products.paginator.page_range %}
+            {% if products.number == num %}
+            <span class="page-link active">{{ num }}</span>
+            {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+            <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="page-link">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+            
+            {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="page-link">Вперёд</a>
+            <a href="?page={{ products.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="page-link">Последняя</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
         {% else %}
         <div class="empty-state">
-            <div class="empty-state-icon"></div>
-            <h3>Товаров пока нет</h3>
-            <p>Добавьте первые товары через панель администратора</p>
-            <br>
-            <a href="/admin" class="btn">Перейти в админку</a>
+            <div class="empty-state-icon">🔍</div>
+            <h3>Товары не найдены</h3>
+            <p>Попробуйте изменить параметры поиска или сбросить фильтры</p>
+            <a href="{% url 'home' %}" class="btn">Сбросить фильтры</a>
         </div>
         {% endif %}
     </main>
@@ -113,12 +227,12 @@
                     Адрес: г. Новосибирск, ул. Тюленина 15/1, 124</p>
                 </div>
                 <div class="footer-section">
-                    <h3>ℹ О магазине</h3>
+                    <h3>О магазине</h3>
                     <p>OnlineShop - современный интернет-магазин с широким ассортиментом товаров. 
                     Мы работаем с 2023 года и стремимся предоставить лучший сервис.</p>
                 </div>
                 <div class="footer-section">
-                    <h3> Разделы</h3>
+                    <h3>Разделы</h3>
                     <p>
                         <a href="/">Главная</a><br>
                         <a href="/admin">Админ-панель</a><br>
