@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="wallet-container">
-    <h1 class="page-title">👛 OnlineSale Wallet</h1>
+    <h1 class="page-title"> OnlineSale Wallet</h1>
     
     <div class="wallet-card">
         <div class="wallet-balance-display">
@@ -14,12 +14,12 @@
             <form action="{% url 'orders:add_funds' %}" method="post" class="add-funds-form">
                 {% csrf_token %}
                 <input type="number" name="amount" placeholder="Сумма" min="100" class="form-input">
-                <button type="submit" class="btn btn-primary">💰 Пополнить</button>
+                <button type="submit" class="btn btn-primary"> Пополнить</button>
             </form>
         </div>
         
         <div class="wallet-benefits">
-            <h3>🎁 Преимущества Wallet:</h3>
+            <h3> Преимущества Wallet:</h3>
             <ul>
                 <li>✅ Скидка 10% на все заказы</li>
                 <li>✅ Мгновенная оплата</li>
@@ -30,7 +30,7 @@
     </div>
     
     <div class="wallet-history">
-        <h2>📋 Последние заказы с оплатой Wallet</h2>
+        <h2> Последние заказы с оплатой Wallet</h2>
         {% if orders %}
         <div class="orders-mini-list">
             {% for order in orders %}

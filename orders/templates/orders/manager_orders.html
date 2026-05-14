@@ -1,0 +1,74 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Панель менеджера{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 40px; padding-bottom: 40px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 class="page-title" style="color: white; margin: 0;"> Управление заказами</h2>
+        
+        <!-- Фильтр -->
+        <form method="get" class="filter-form" style="display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px;">
+            <label style="color: white; display: flex; align-items: center;">Статус:</label>
+            <select name="status" onchange="this.form.submit()" style="padding: 8px; border-radius: 5px; border: none; background: white; color: #333;">
+                <option value="">Все статусы</option>
+                {% for val, label in status_choices %}
+                <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    {% if orders %}
+    <div class="table-responsive">
+        <table class="table" style="width: 100%; border-collapse: collapse; color: white;">
+            <thead>
+                <tr style="background: rgba(255,255,255,0.1); border-bottom: 2px solid #a81818;">
+                    <th style="padding: 15px; text-align: left;">ID Заказа</th>
+                    <th style="padding: 15px; text-align: left;">Клиент</th>
+                    <th style="padding: 15px; text-align: left;">Сумма</th>
+                    <th style="padding: 15px; text-align: left;">Дата</th>
+                    <th style="padding: 15px; text-align: left;">Текущий статус</th>
+                    <th style="padding: 15px; text-align: left;">Изменить статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 15px;">#{{ order.id }}</td>
+                    <td style="padding: 15px;">
+                        <div style="font-weight: bold;">{{ order.first_name }} {{ order.last_name }}</div>
+                        <div style="font-size: 0.8em; color: #aaa;">{{ order.email }}</div>
+                    </td>
+                    <td style="padding: 15px; font-weight: bold; color: #4caf50;">{{ order.final_amount }} ₽</td>
+                    <td style="padding: 15px;">{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                    <td style="padding: 15px;">
+                        <span class="badge" style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8em;">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">
+                        <!-- Форма изменения статуса -->
+                        <form method="post" action="{% url 'orders:update_status' order.id %}" style="display: flex; gap: 5px;">
+                            {% csrf_token %}
+                            <select name="status" class="status-select" style="padding: 5px; border-radius: 5px; border: none; font-size: 0.8em;">
+                                {% for val, label in status_choices %}
+                                <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" style="background: #a81818; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em;">✓</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div style="text-align: center; color: #aaa; padding: 50px;">
+            <h3>Заказов пока нет (╥_╥)</h3>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
