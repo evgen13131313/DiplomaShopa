@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from shop.models import Product
 from decimal import Decimal
 
@@ -144,3 +145,51 @@ class Wallet(models.Model):
             self.save()
             return True
         return False
+
+
+# ===== ЛОГИРОВАНИЕ ДЕЙСТВИЙ =====
+class ActionLog(models.Model):
+    ACTION_CHOICES = [
+        ('order_created', 'Заказ создан'),
+        ('order_status_changed', 'Статус заказа изменён'),
+        ('item_added_to_cart', 'Товар добавлен в корзину'),
+        ('payment_made', 'Оплата произведена'),
+        ('user_logged_in', 'Пользователь вошёл в систему'),
+    ]
+    
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        verbose_name="Пользователь"
+    )
+    action = models.CharField(
+        max_length=50, 
+        choices=ACTION_CHOICES, 
+        verbose_name="Действие"
+    )
+    object_type = models.CharField(
+        max_length=50, 
+        verbose_name="Тип объекта"
+    )
+    object_id = models.PositiveIntegerField(
+        verbose_name="ID объекта"
+    )
+    description = models.TextField(
+        blank=True, 
+        verbose_name="Описание"
+    )
+    timestamp = models.DateTimeField(
+        default=timezone.now, 
+        verbose_name="Время"
+    )
+    
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = "Лог действий"
+        verbose_name_plural = "Логи действий"
+    
+    def __str__(self):
+        user_name = self.user.username if self.user else 'Аноним'
+        return f"{user_name} — {self.get_action_display()} ({self.timestamp.strftime('%d.%m.%Y %H:%M')})"
