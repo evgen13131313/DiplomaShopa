@@ -1,16 +1,11 @@
- version: '3.8'
-
 services:
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app  # Синхронизация папок (чтобы правки кода работали сразу)
-      - db_data:/app/db.sqlite3 # Сохранение базы данных
+      - .:/app
+      # Строку с db_data мы убрали, так как папка проекта уже подключена целиком
     ports:
       - "8000:8000"
     environment:
       - DEBUG=1
-
-volumes:
-  db_data:
