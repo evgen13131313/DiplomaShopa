@@ -15,12 +15,12 @@
     <!-- Шапка -->
     <header>
         <div class="container">
-            <div class="logo">
-                <a href="{% url 'home' %}" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
-                    <!-- Логотип через внешний SVG файл -->
-                    <img src="{% static 'img/logo.png' %}" alt="OnlineSale" style="height: 45px; width: auto; display: block;">
-                </a>
-            </div>
+                <div class="logo">
+        <a href="{% url 'home' %}" class="logo-link">
+            <img src="{% static 'img/logo.png' %}" alt="OnlineSale" class="logo-img">
+            <span class="logo-text">OnlineSale</span>
+        </a>
+        </div>
             
             <nav>
                 <a href="{% url 'home' %}">Главная</a>

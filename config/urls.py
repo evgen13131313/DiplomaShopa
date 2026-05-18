@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('shop.urls')),
     path('cart/', include('cart.urls', namespace='cart')),
     path('orders/', include('orders.urls', namespace='orders')),
+    path('api/', include('api.urls')),
 ]
 
 # Добавь это в конец файла для работы с картинками в режиме разработки
